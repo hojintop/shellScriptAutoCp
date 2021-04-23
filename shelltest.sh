@@ -1,6 +1,8 @@
 #!/bin/bash
 NOW=$(DATE)
-echo "$NOW : 반영시작시간"
+echo "반영시작시간 : $NOW"
+# 신규반영항목을 담을배열
+newFileList=()	
 
 while read List
 	do
@@ -33,19 +35,30 @@ while read List
 			cnt=$((cnt+1))
 			# 해당파일 반영을 진행한다.
                 	cp "$valueparam" "$List" 
-			
-			if [ -e "/$List" ]; then
-                                echo "반영완료: $valueparam"
-                        else
-                                echo "반영실패 : $valueparam"
-                        fi
-
-			> ./test.log
 		else
 			echo "기존File이존재하지않음 : $List"
-		fi 
+			newFileList+=("$List")
+		fi		
 	fi
 	done < 위치.txt
+	
+	echo "------------아래항목은 반영될 경로에 파일이 존재 하지않는(신규반영) LIST 로 판단 ------------"	
+	for value in "${newFileList[@]}"; do
+                echo $value
+        done
+	
+	echo "신규 파일을 반영 하시겠습니까?"
+	read
+	newCnt=0
+	for value in "${newFileList[@]}"; do
+    		# 해당파일 반영을 진행한다.
+		newParam=`echo $value | rev | cut -d'/' -f1 | rev`
+                cp "$newParam" "$value"
+		newCnt=$((newCnt+1))
+		
+		echo "반영완료 : $newParam"
+	done
 
 NOW=$(DATE)
-echo "$NOW : 반영종료시간 & 반영완료 파일 $cnt"
+echo "반영종료시간 : $NOW"
+echo "반영완료 하였습니다. 기존파일 : $cnt , 신규파일 : $newCnt"
