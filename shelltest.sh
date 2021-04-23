@@ -1,8 +1,12 @@
 #!/bin/bash
+# Created By hojintop
+
 NOW=$(DATE)
 echo "반영시작시간 : $NOW"
 # 신규반영항목을 담을배열
-newFileList=()	
+newFileList=()
+# 반영실패한 항목을 담을 배열	
+failFileList=()
 
 while read List
 	do
@@ -22,43 +26,72 @@ while read List
 		# $List 앞에 절대경로(/)를 붙여준이유는 어차피 절대경로를 가지로들어오며 특수문자가 있을수 있어 처리함.
 		if [ -e "/$List" ]; then
 			# 있다면 백업을 진행한다.	
-			echo "File존재 백업진행 : $List"
+			echo "백업진행 : $List"
 			backupvalue="$List"'_'`date +%Y%m%d`
 			mv "$List" "$backupvalue"
 
 			if [ -e "/$backupvalue" ]; then
-				echo "백업완료"
+				echo "백업완료 : $backupvalue"
 			else
 				echo "백업실패"
 			fi
-
-			cnt=$((cnt+1))
+			
 			# 해당파일 반영을 진행한다.
-                	cp "$valueparam" "$List" 
+                	cp "$valueparam" "$List"
+			cnt=$((cnt+1)) 
+			echo "반영완료 : $valueparam"
 		else
-			echo "기존File이존재하지않음 : $List"
+			# 기존File이 미존재하는(신규반영파일) 파일항목은 배열에 담는다
 			newFileList+=("$List")
 		fi		
 	fi
 	done < 위치.txt
 	
-	echo "------------아래항목은 반영될 경로에 파일이 존재 하지않는(신규반영) LIST 로 판단 ------------"	
-	for value in "${newFileList[@]}"; do
-                echo $value
-        done
-	
-	echo "신규 파일을 반영 하시겠습니까?"
-	read
+	# 아래 부터는 기존 File이 없어 반영하지 않은 파일에 대한 검증부
+	newFileListSize=${#newFileList[@]}
 	newCnt=0
-	for value in "${newFileList[@]}"; do
-    		# 해당파일 반영을 진행한다.
-		newParam=`echo $value | rev | cut -d'/' -f1 | rev`
-                cp "$newParam" "$value"
-		newCnt=$((newCnt+1))
+	failCnt=0
+	
+	if [ 0 -lt $newFileListSize ]; then
+		echo "------------아래항목은 반영될 경로에 파일이 존재 하지않는(신규반영) LIST 로 판단 ------------"
+	
+		for newFile in "${newFileList[@]}"; do
+                	echo $newFile
+        	done
 		
-		echo "반영완료 : $newParam"
-	done
-
+		echo "신규 파일을 반영 하시겠습니까?"
+	        read
+	
+	        for newFile in "${newFileList[@]}"; do
+        	        # 해당파일 반영을 진행한다.
+                	newParam=`echo $newFile | rev | cut -d'/' -f1 | rev`
+			thisFilePath=`pwd`'/'"$newParam"
+			
+			if [ -e "/$thisFilePath" ]; then
+				cp "$newParam" "$newFile"
+				newCnt=$((newCnt+1))
+				echo "반영완료 : $newParam"	
+			else
+				# 반영실패(존재하지않는 파일) 항목을 배열에 담는다
+				failFileList+=("$newFile")
+				failCnt=$((failCnt+1))
+			fi
+        	done
+	fi
+	
 NOW=$(DATE)
 echo "반영종료시간 : $NOW"
-echo "반영완료 하였습니다. 기존파일 : $cnt , 신규파일 : $newCnt"
+echo "반영완료 하였습니다. 기존파일 : $cnt , 신규파일 : $newCnt , 반영실패항목 : $failCnt"
+echo "반영 실패 항목이 있다면 failedFileList.log 파일을 확인하세요"
+
+
+#반영실패항목log처리
+failFileListSize=${#failFileList[@]}
+
+if [ 0 -lt $failFileListSize ]; then
+	echo "반영종료시간 : $NOW"
+	echo "반영 실패한 파일 항목"
+	for failedFile in "${failFileList[@]}"; do
+		echo $failedFile
+	done
+fi > failedFileList.log
