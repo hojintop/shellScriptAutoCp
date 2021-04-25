@@ -59,24 +59,26 @@ while read List
                 	echo $newFile
         	done
 		
-		echo "신규 파일을 반영 하시겠습니까?"
-	        read
-	
-	        for newFile in "${newFileList[@]}"; do
-        	        # 해당파일 반영을 진행한다.
-                	newParam=`echo $newFile | rev | cut -d'/' -f1 | rev`
-			thisFilePath=`pwd`'/'"$newParam"
-			
-			if [ -e "/$thisFilePath" ]; then
-				cp "$newParam" "$newFile"
-				newCnt=$((newCnt+1))
-				echo "반영완료 : $newParam"	
-			else
-				# 반영실패(존재하지않는 파일) 항목을 배열에 담는다
-				failFileList+=("$newFile")
-				failCnt=$((failCnt+1))
-			fi
-        	done
+		echo "신규 파일을 반영 하시겠습니까?(Y:Yes , N:No)"
+	        read input
+		
+		if [[ "$input" == "Y" ]] || [[ "$input" == "y" ]]; then
+			for newFile in "${newFileList[@]}"; do
+                                # 해당파일 반영을 진행한다.
+                                newParam=`echo $newFile | rev | cut -d'/' -f1 | rev`
+                                thisFilePath=`pwd`'/'"$newParam"
+
+                                if [ -e "/$thisFilePath" ]; then
+                                        cp "$newParam" "$newFile"
+                                        newCnt=$((newCnt+1))
+                                        echo "반영완료 : $newParam"
+                                else
+                                        # 반영실패(존재하지않는 파일) 항목을 배열에 담는다
+                                        failFileList+=("$newFile")
+                                        failCnt=$((failCnt+1))
+                                fi
+                        done
+		fi
 	fi
 	
 NOW=$(DATE)
@@ -90,7 +92,7 @@ failFileListSize=${#failFileList[@]}
 
 if [ 0 -lt $failFileListSize ]; then
 	echo "반영종료시간 : $NOW"
-	echo "반영 실패한 파일 항목"
+	echo "반영 실패한 파일 항목(반영할파일 미존재)"
 	for failedFile in "${failFileList[@]}"; do
 		echo $failedFile
 	done
