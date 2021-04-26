@@ -34,17 +34,21 @@ while read List
 
 			if [ -e "/$backupvalue" ]; then
 				echo "백업완료 : $backupvalue"
+				
+				# 해당파일 반영을 진행한다.
+                        	cp "$valueparam" "$List"
+                        	cnt=$((cnt+1))
+                        	echo "반영완료 : $valueparam"
+
+                        	#반영완료항목을 배열에 담는다
+                        	succFileList+=("$List")
 			else
+				# 반영실패(백업파일이 존재하지않는 - 백업실패) 항목을 배열에 담는다
+                                failFileList+=("$newFile : 백업실패")
+                                failCnt=$((failCnt+1))
+
 				echo "백업실패"
 			fi
-			
-			# 해당파일 반영을 진행한다.
-                	cp "$valueparam" "$List"
-			cnt=$((cnt+1)) 
-			echo "반영완료 : $valueparam"
-	
-			#반영완료항목을 배열에 담는다
-			succFileList+=("$List")
 		else
 			# 기존File이 미존재하는(신규반영파일) 파일항목은 배열에 담는다
 			newFileList+=("$List")
@@ -79,8 +83,8 @@ while read List
                                         echo "반영완료 : $newParam"
 					succFileList+=("$newFile")
                                 else
-                                        # 반영실패(존재하지않는 파일) 항목을 배열에 담는다
-                                        failFileList+=("$newFile")
+                                        # 반영실패(미존재 파일) 항목을 배열에 담는다
+                                        failFileList+=("$newFile : 반영할 파일 미존재")
                                         failCnt=$((failCnt+1))
                                 fi
                         done
@@ -99,7 +103,7 @@ failFileListSize=${#failFileList[@]}
 
 if [ 0 -lt $failFileListSize ]; then
 	echo "반영종료시간 : $NOW"
-	echo "반영 실패한 파일 항목(반영할파일 미존재로 판단)"
+	echo "반영 실패한 파일 항목"
 	for failedFile in "${failFileList[@]}"; do
 		echo $failedFile
 	done
