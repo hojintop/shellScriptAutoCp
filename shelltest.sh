@@ -5,6 +5,8 @@ NOW=$(DATE)
 echo "반영시작시간 : $NOW"
 # 신규반영항목을 담을배열
 newFileList=()
+# 반영성공한 항목을 담을 배열
+succFileList=()
 # 반영실패한 항목을 담을 배열	
 failFileList=()
 
@@ -40,6 +42,9 @@ while read List
                 	cp "$valueparam" "$List"
 			cnt=$((cnt+1)) 
 			echo "반영완료 : $valueparam"
+	
+			#반영완료항목을 배열에 담는다
+			succFileList+=("$List")
 		else
 			# 기존File이 미존재하는(신규반영파일) 파일항목은 배열에 담는다
 			newFileList+=("$List")
@@ -72,6 +77,7 @@ while read List
                                         cp "$newParam" "$newFile"
                                         newCnt=$((newCnt+1))
                                         echo "반영완료 : $newParam"
+					succFileList+=("$newFile")
                                 else
                                         # 반영실패(존재하지않는 파일) 항목을 배열에 담는다
                                         failFileList+=("$newFile")
@@ -84,6 +90,7 @@ while read List
 NOW=$(DATE)
 echo "반영종료시간 : $NOW"
 echo "반영완료 하였습니다. 기존파일 : $cnt , 신규파일 : $newCnt , 반영실패항목 : $failCnt"
+echo "반영 성공 항목은 succedFileList.log 파일을 확인하세요"
 echo "반영 실패 항목이 있다면 failedFileList.log 파일을 확인하세요"
 
 
@@ -92,8 +99,19 @@ failFileListSize=${#failFileList[@]}
 
 if [ 0 -lt $failFileListSize ]; then
 	echo "반영종료시간 : $NOW"
-	echo "반영 실패한 파일 항목(반영할파일 미존재)"
+	echo "반영 실패한 파일 항목(반영할파일 미존재로 판단)"
 	for failedFile in "${failFileList[@]}"; do
 		echo $failedFile
 	done
 fi > failedFileList.log
+
+#반영성공항목log처리
+succFileListSize=${#succFileList[@]}
+
+if [ 0 -lt $succFileListSize ]; then
+	echo "반영종료시간 : $NOW"
+	echo "반영 성공한 파일 항목"
+	for succFile in "${succFileList[@]}"; do
+		echo $succFile
+	done
+fi > succedFileList.log
