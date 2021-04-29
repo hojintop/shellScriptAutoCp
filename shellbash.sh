@@ -15,6 +15,7 @@ succFileList=()
 # 반영실패한 항목을 담을 배열	
 failFileList=()
 cnt=0
+failCnt=0
 
 while read List
 	do
@@ -76,7 +77,6 @@ while read List
 	# 아래 부터는 기존 File이 없어 반영하지 않은 파일에 대한 검증부
 	newFileListSize=${#newFileList[@]}
 	newCnt=0
-	failCnt=0
 	
 	if [ 0 -lt $newFileListSize ]; then
 		echo "------------아래항목은 반영될 경로에 파일이 존재 하지않는(신규반영) LIST 로 판단 ------------"
@@ -90,22 +90,28 @@ while read List
 		
 		if [[ "$input" == "Y" ]] || [[ "$input" == "y" ]]; then
 			for newFile in "${newFileList[@]}"; do
-                                # 해당파일 반영을 진행한다.
-                                newParam=`echo $newFile | rev | cut -d'/' -f1 | rev`
-                                thisFilePath=`pwd`'/'"$newParam"
+                    # 해당파일 반영을 진행한다.
+                    newParam=`echo $newFile | rev | cut -d'/' -f1 | rev`
+                    thisFilePath=`pwd`'/'"$newParam"
 
-                                if [ -e "/$thisFilePath" ]; then
-                                        cp "$newParam" "$newFile"
-                                        newCnt=$((newCnt+1))
-                                        echo "반영완료 : $newParam"
-										succFileList+=("$newFile")
-										cnt=$((cnt+1))
-                                else
-                                        # 반영실패(미존재 파일) 항목을 배열에 담는다
-                                        failFileList+=("$newFile : 반영할 파일 미존재")
-                                        failCnt=$((failCnt+1))
-                                fi
-                        done
+                    if [ -e "/$thisFilePath" ]; then
+                            cp "$newParam" "$newFile"
+                            newCnt=$((newCnt+1))
+                            echo "반영완료 : $newParam"
+							succFileList+=("$newFile")
+							cnt=$((cnt+1))
+                    else
+                            # 반영실패(미존재 파일) 항목을 배열에 담는다
+                            failFileList+=("$newFile : 반영할 파일 미존재")
+                            failCnt=$((failCnt+1))
+                    fi
+            done
+		else
+			# 반영종료 (적용원하지 않는 신규  파일) 항목을 배열에 담는다
+			for newFile in "${newFileList[@]}"; do
+					failFileList+=("$newFile : 미반영")
+                    failCnt=$((failCnt+1))
+            done
 		fi
 	fi
 	
