@@ -1,6 +1,10 @@
 #!/bin/ksh
 # Created By hojintop
 
+# 윈도우에서 txt 저장시 개행문자 ^M 이 포함되어 표기 되어 제거하고 작업하도록 한다
+tr -d '\015' < depList.txt > depList.txt
+mv depList1.txt ./depList.txt
+
 now=$(date)
 echo "반영시작시간 : $now"
 # 신규반영항목을 담을배열
@@ -10,7 +14,7 @@ set -A succFileList
 # 반영실패한 항목을 담을 배열	
 set -A failFileList
 
-testcnt=0
+newCnt=0
 failCnt=0
 cnt=0
 
@@ -51,8 +55,8 @@ while read List
 			#  반영하고자하는 파일의 경로가 디렉터리(정상경로) 인지 확인하여 정상이라면 신규파일 비정상이라면 경로불분명으로 실패항목에 담는다.
 			if [ -d "$valuePathParam" ]; then
 				# 기존File이 미존재하는(신규반영파일) 파일항목은 배열에 담는다
-                                newFileList[testcnt]="$List"
-                                ((testcnt+=1))
+                                newFileList[newCnt]="$List"
+                                ((newCnt+=1))
 			else
 				failFileList[failCnt]="$List:파일경로불분명"
                                 ((failCnt+=1))
@@ -70,7 +74,8 @@ while read List
 		echo "------------아래항목은 반영될 경로에 파일이 존재 하지않는(신규반영) LIST 로 판단 ------------"
 	
 		for newFile in ${newFileList[*]}; do
-                	echo "$newFile"
+                	echo "$newFile
+"
         	done
 		
 		echo "신규 파일을 반영 하시겠습니까?(Y:Yes , N:No)"
@@ -85,8 +90,8 @@ while read List
                                         cp "$newParam" "$newDepFile"
                                         ((newCnt+=1))
                                         echo "반영완료 : $newParam"
-					succFileList[cnt]="$newDepFile"
-                                	((cnt+=1))	
+										succFileList[cnt]="$newDepFile"
+                                		((cnt+=1))	
                                 else
                                         # 반영실패(미존재 파일) 항목을 배열에 담는다
                                         failFileList[failCnt]="$newDepFile:반영할파일미존재"

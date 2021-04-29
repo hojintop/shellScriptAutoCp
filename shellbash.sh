@@ -1,6 +1,11 @@
 #!/bin/bash
 # Created By hojintop
 
+# 윈도우에서 txt 저장시 개행문자 ^M 이 포함되어 표기 되어 제거하고 작업하도록 한다
+tr -d '\015' < depList.txt > depList1.txt
+mv depList1.txt ./depList.txt
+
+
 NOW=$(DATE)
 echo "반영시작시간 : $NOW"
 # 신규반영항목을 담을배열
@@ -9,6 +14,7 @@ newFileList=()
 succFileList=()
 # 반영실패한 항목을 담을 배열	
 failFileList=()
+cnt=0
 
 while read List
 	do
@@ -16,6 +22,9 @@ while read List
 		# txt 에서 읽어온 라인의 txt를 구분자 '/' 로 잘라 오른쪽 첫번째 단어를 추출한다 (순수 파일명및 확장자)
 		valueparam=`echo $List | rev | cut -d'/' -f1 | rev`
 	
+		# 파일명.확장자 이전(filepath)경로값만 가져와 옳바른 디렉터리인지 확인하기 위해추출
+		valuePathParam="${List%%$valueparam}"
+
 		# 파일명의 특수문자 여부 처리 '$' || '-' 만 확인 추가검증 필요시 조건 추가할것.	
 		# 필요시 주석해제
 		#if [[ "$List" =~ '$' ]] || [[ "$List" =~ '-' ]]; then
@@ -37,11 +46,11 @@ while read List
 				
 				# 해당파일 반영을 진행한다.
                         	cp "$valueparam" "$List"
-                        	cnt=$((cnt+1))
                         	echo "반영완료 : $valueparam"
 
                         	#반영완료항목을 배열에 담는다
                         	succFileList+=("$List")
+                        	cnt=$((cnt+1))
 			else
 				# 반영실패(백업파일이 존재하지않는 - 백업실패) 항목을 배열에 담는다
                                 failFileList+=("$newFile : 백업실패")
@@ -50,11 +59,19 @@ while read List
 				echo "백업실패"
 			fi
 		else
-			# 기존File이 미존재하는(신규반영파일) 파일항목은 배열에 담는다
-			newFileList+=("$List")
+			#  반영하고자하는 파일의 경로가 디렉터리(정상경로) 인지 확인하여 정상이라면 신규파일 비정상이라면 경로불분명으로 실패항목에 담는다.
+			if [ -d "$valuePathParam" ]; then
+				# 기존File이 미존재하는(신규반영파일) 파일항목은 배열에 담는다
+                newFileList+=("$List")
+                newCnt=$((newCnt+1))
+			else
+				failFileList+=("$List : 파일경로불분명")
+                failCnt=$((failCnt+1))
+                echo "옳바르지않은경로확인:$List"
+			fi
 		fi		
 	fi
-	done < 위치.txt
+	done < depList.txt
 	
 	# 아래 부터는 기존 File이 없어 반영하지 않은 파일에 대한 검증부
 	newFileListSize=${#newFileList[@]}
@@ -81,7 +98,8 @@ while read List
                                         cp "$newParam" "$newFile"
                                         newCnt=$((newCnt+1))
                                         echo "반영완료 : $newParam"
-					succFileList+=("$newFile")
+										succFileList+=("$newFile")
+										cnt=$((cnt+1))
                                 else
                                         # 반영실패(미존재 파일) 항목을 배열에 담는다
                                         failFileList+=("$newFile : 반영할 파일 미존재")

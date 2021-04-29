@@ -1,8 +1,0 @@
-/Users/klic/Desktop/dev/shellScript/testcp/testfile1.jsp
-/Users/klic/Desktop/dev/shellScript/testcp/testfile2.jsp
-/Users/klic/Desktop/dev/shellScript/testcp/testfile2-1.jsp
-/Users/klic/Desktop/dev/shellScript/testcp/testfile3.class
-/Users/klic/Desktop/dev/shellScript/testcp/testfile4.css
-/Users/klic/Desktop/dev/shellScript/testcp/testfile5.js
-
-/Users/klic/Desktop/dev/shellScript/testfile6.js
