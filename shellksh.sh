@@ -39,28 +39,28 @@ while read List
 				echo "백업완료 : $backupvalue"
 				
 				# 해당파일 반영을 진행한다.
-                        	cp "$valueparam" "$List"
-                        	echo "반영완료 : $valueparam"
+	        	cp "$valueparam" "$List"
+	        	echo "반영완료 : $valueparam"
 
-                        	#반영완료항목을 배열에 담는다
-                        	succFileList[cnt]="$List"
+	        	#반영완료항목을 배열에 담는다
+	        	succFileList[cnt]="$List"
 				((cnt+=1))
 			else
 				# 반영실패(백업파일이 존재하지않는 - 백업실패) 항목을 배열에 담는다
-                                failFileList[failCnt]="$List:백업실패"
-                                ((failCnt+=1))
+                failFileList[failCnt]="$List:백업실패"
+                ((failCnt+=1))
 				echo "백업실패"
 			fi
 		else
 			#  반영하고자하는 파일의 경로가 디렉터리(정상경로) 인지 확인하여 정상이라면 신규파일 비정상이라면 경로불분명으로 실패항목에 담는다.
 			if [ -d "$valuePathParam" ]; then
 				# 기존File이 미존재하는(신규반영파일) 파일항목은 배열에 담는다
-                                newFileList[newCnt]="$List"
-                                ((newCnt+=1))
+                newFileList[newCnt]="$List"
+                ((newCnt+=1))
 			else
 				failFileList[failCnt]="$List:파일경로불분명"
-                                ((failCnt+=1))
-                                echo "옳바르지않은경로확인:$List"
+                ((failCnt+=1))
+                echo "옳바르지않은경로확인:$List"
 			fi
 		fi		
 	fi
@@ -74,8 +74,7 @@ while read List
 		echo "------------아래항목은 반영될 경로에 파일이 존재 하지않는(신규반영) LIST 로 판단 ------------"
 	
 		for newFile in ${newFileList[*]}; do
-                	echo "$newFile
-"
+                	echo "$newFile"
         	done
 		
 		echo "신규 파일을 반영 하시겠습니까?(Y:Yes , N:No)"
@@ -83,21 +82,27 @@ while read List
 		
 		if [[ "$input" == "Y" ]] || [[ "$input" == "y" ]]; then
 			for newDepFile in ${newFileList[*]}; do
-                                # 해당파일 반영을 진행한다.
-                                newParam=`echo $newDepFile | rev | cut -d'/' -f1 | rev`
-                                thisFilePath=`pwd`'/'"$newParam"
-                                if [ -e "/$thisFilePath" ]; then
-                                        cp "$newParam" "$newDepFile"
-                                        ((newCnt+=1))
-                                        echo "반영완료 : $newParam"
-										succFileList[cnt]="$newDepFile"
-                                		((cnt+=1))	
-                                else
-                                        # 반영실패(미존재 파일) 항목을 배열에 담는다
-                                        failFileList[failCnt]="$newDepFile:반영할파일미존재"
-                                        ((failCnt+=1))
-                                fi
-                        done
+                    # 해당파일 반영을 진행한다.
+                    newParam=`echo $newDepFile | rev | cut -d'/' -f1 | rev`
+                    thisFilePath=`pwd`'/'"$newParam"
+                    if [ -e "/$thisFilePath" ]; then
+                            cp "$newParam" "$newDepFile"
+                            ((newCnt+=1))
+                            echo "반영완료 : $newParam"
+							succFileList[cnt]="$newDepFile"
+                    		((cnt+=1))	
+                    else
+                            # 반영실패(미존재 파일) 항목을 배열에 담는다
+                            failFileList[failCnt]="$newDepFile:반영할파일미존재"
+                            ((failCnt+=1))
+                    fi
+            done
+		else
+			# 반영종료 (적용원하지 않는 신규  파일) 항목을 배열에 담는다
+			for newDepFile in ${newFileList[*]}; do
+                    failFileList[failCnt]="$newDepFile:미반영"
+                    ((failCnt+=1))
+            done
 		fi
 	fi
 	

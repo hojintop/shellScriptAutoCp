@@ -46,16 +46,16 @@ while read List
 				echo "백업완료 : $backupvalue"
 				
 				# 해당파일 반영을 진행한다.
-                        	cp "$valueparam" "$List"
-                        	echo "반영완료 : $valueparam"
+            	cp "$valueparam" "$List"
+            	echo "반영완료 : $valueparam"
 
-                        	#반영완료항목을 배열에 담는다
-                        	succFileList+=("$List")
-                        	cnt=$((cnt+1))
+            	#반영완료항목을 배열에 담는다
+            	succFileList+=("$List")
+            	cnt=$((cnt+1))
 			else
 				# 반영실패(백업파일이 존재하지않는 - 백업실패) 항목을 배열에 담는다
-                                failFileList+=("$newFile : 백업실패")
-                                failCnt=$((failCnt+1))
+                failFileList+=("$newFile : 백업실패")
+                failCnt=$((failCnt+1))
 
 				echo "백업실패"
 			fi
@@ -82,8 +82,8 @@ while read List
 		echo "------------아래항목은 반영될 경로에 파일이 존재 하지않는(신규반영) LIST 로 판단 ------------"
 	
 		for newFile in "${newFileList[@]}"; do
-                	echo $newFile
-        	done
+            	echo $newFile
+    	done
 		
 		echo "신규 파일을 반영 하시겠습니까?(Y:Yes , N:No)"
 	        read input
