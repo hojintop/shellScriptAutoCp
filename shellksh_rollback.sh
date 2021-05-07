@@ -6,7 +6,7 @@ tr -d '\015' < depList.txt > depList.txt
 mv depList1.txt ./depList.txt
 
 now=$(date)
-echo "롤시작시간 : $now"
+echo "롤백시작시간 : $now"
 # 원복된 파일항목을 담을배열
 set -A rbFileList
 # 롤백 실패한 항목을 담을 배열		
