@@ -33,7 +33,7 @@ while read List
 			# 있다면 롤백을 진행한다.	
 			echo "롤백진행 : $List"
 			
-			mv "$backupvalue" "$List"
+			cp "$backupvalue" "$List"
 
 			if [ -e "$List" ]; then
 				echo "롤백완료 : $List"
@@ -58,7 +58,7 @@ echo "롤백종료시간 : $NOW"
 echo "롤백완료 하였습니다. 롤백파일 : $rbcnt , 롤백실패항목 : $rbfailCnt"
 echo "롤백 성공 항목은 rbFileList.log 파일을 확인하세요"
 echo "롤백 실패 항목이 있다면 rbfailedFileList.log 파일을 확인하세요"
-
+echo "*** 기존 백업된 파일은 삭제되지않고 해당 path 에 존재 합니다. ***"
 
 #롤백실패항목log처리
 rbfailFileListSize=${#rbfailFileList[@]}
