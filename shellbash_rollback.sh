@@ -6,7 +6,11 @@ tr -d '\015' < depList.txt > depList1.txt
 mv depList1.txt ./depList.txt
 
 
-NOW=$(DATE)
+echo "백업된 파일은 삭제되지않습니다. 현재 반영된 파일 모두 원복(롤백) 하시겠습니까? (Y:Yes , N:No)"
+	        read input
+		
+if [[ "$input" == "Y" ]] || [[ "$input" == "y" ]]; then
+	NOW=$(DATE)
 echo "롤백시작시간 : $NOW"
 # 원복된 파일항목을 담을배열
 rbFileList=()
@@ -53,31 +57,36 @@ while read List
 	done < depList.txt
 	
 	
-NOW=$(DATE)
-echo "롤백종료시간 : $NOW"
-echo "롤백완료 하였습니다. 롤백파일 : $rbcnt , 롤백실패항목 : $rbfailCnt"
-echo "롤백 성공 항목은 rbFileList.log 파일을 확인하세요"
-echo "롤백 실패 항목이 있다면 rbfailedFileList.log 파일을 확인하세요"
-echo "*** 기존 백업된 파일은 삭제되지않고 해당 path 에 존재 합니다. ***"
-
-#롤백실패항목log처리
-rbfailFileListSize=${#rbfailFileList[@]}
-
-if [ 0 -lt $rbfailFileListSize ]; then
+	NOW=$(DATE)
 	echo "롤백종료시간 : $NOW"
-	echo "롤백 실패한 파일 항목"
-	for rbfailedFile in "${rbfailFileList[@]}"; do
-		echo $rbfailedFile
-	done
-fi > rbfailedFileList.log
+	echo "롤백완료 하였습니다. 롤백파일 : $rbcnt , 롤백실패항목 : $rbfailCnt"
+	echo "롤백 성공 항목은 rbFileList.log 파일을 확인하세요"
+	echo "롤백 실패 항목이 있다면 rbfailedFileList.log 파일을 확인하세요"
+	echo "*** 기존 백업된 파일은 삭제되지않고 해당 path 에 존재 합니다. ***"
 
-#롤백성공항목log처리
-rbFileListSize=${#rbFileList[@]}
+	#롤백실패항목log처리
+	rbfailFileListSize=${#rbfailFileList[@]}
 
-if [ 0 -lt $rbFileListSize ]; then
-	echo "롤백종료시간 : $NOW"
-	echo "롤백 성공한 파일 항목"
-	for rbFile in "${rbFileList[@]}"; do
-		echo $rbFile
-	done
-fi > rbFileList.log
+	if [ 0 -lt $rbfailFileListSize ]; then
+		echo "롤백종료시간 : $NOW"
+		echo "롤백 실패한 파일 항목"
+		for rbfailedFile in "${rbfailFileList[@]}"; do
+			echo $rbfailedFile
+		done
+	fi > rbfailedFileList.log
+
+	#롤백성공항목log처리
+	rbFileListSize=${#rbFileList[@]}
+
+	if [ 0 -lt $rbFileListSize ]; then
+		echo "롤백종료시간 : $NOW"
+		echo "롤백 성공한 파일 항목"
+		for rbFile in "${rbFileList[@]}"; do
+			echo $rbFile
+		done
+	fi > rbFileList.log
+else
+	echo "롤백을 진행하지 않고 종료합니다."
+fi
+
+
